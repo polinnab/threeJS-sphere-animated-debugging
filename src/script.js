@@ -3,6 +3,11 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 
+// Loader
+const textureLoader = new THREE.TextureLoader()
+
+const normalTexture = textureLoader.load('/textures/NormalMap.png');
+
 // Debug
 const gui = new dat.GUI()
 
@@ -13,12 +18,15 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Objects
-const geometry = new THREE.TorusGeometry( .7, .2, 16, 100 );
+const geometry = new THREE.SphereBufferGeometry(.5, 64, 64)
 
 // Materials
 
-const material = new THREE.MeshBasicMaterial()
-material.color = new THREE.Color(0xff0000)
+const material = new THREE.MeshStandardMaterial()
+material.metalness = 0.7
+material.roughness = 0.2 
+material.normalMap = normalTexture; 
+material.color = new THREE.Color(0x292929)
 
 // Mesh
 const sphere = new THREE.Mesh(geometry,material)
@@ -31,6 +39,47 @@ pointLight.position.x = 2
 pointLight.position.y = 3
 pointLight.position.z = 4
 scene.add(pointLight)
+
+//Light2
+const pointLight2 = new THREE.PointLight(0xff0000, 2)
+pointLight2.position.set(-1.86,1,-1,65)
+pointLight2.intensity = 10 
+scene.add(pointLight2)
+
+const light2 = gui.addFolder('Light 2')
+
+light2.add(pointLight2.position, 'y').min(-3).max(3).step(0.01)
+light2.add(pointLight2.position, 'x').min(-6).max(6).step(0.01)
+light2.add(pointLight2.position, 'z').min(-3).max(3).step(0.01)
+light2.add(pointLight2, 'intensity').min(0).max(10).step(0.01)
+
+// const pointLightHelper = new THREE.PointLightHelper(pointLight2, 1)
+// scene.add(pointLightHelper)
+
+//Light3
+const pointLight3 = new THREE.PointLight(0x75de, 2)
+pointLight3.position.set(1.6,-1.52,-1.589)
+pointLight3.intensity = 10
+scene.add(pointLight3)
+
+const light3 = gui.addFolder('Light 3')
+
+light3.add(pointLight3.position, 'y').min(-3).max(3).step(0.01)
+light3.add(pointLight3.position, 'x').min(-6).max(6).step(0.01)
+light3.add(pointLight3.position, 'z').min(-3).max(3).step(0.01)
+light3.add(pointLight3, 'intensity').min(0).max(10).step(0.01)
+
+const light3Color = {
+    color: 0x75de
+}
+
+light3.addColor(light3Color, 'color')
+    .onChange(() => {
+        pointLight3.color.set(light3Color.color)
+    })
+
+// const pointLightHelper2 = new THREE.PointLightHelper(pointLight3, 1)
+// scene.add(pointLightHelper2)
 
 /**
  * Sizes
@@ -73,7 +122,8 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -82,15 +132,65 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
  * Animate
  */
 
+document.addEventListener('mousemove', onDocumentMouseMove)
+
+let mouseX = 0
+let mouseY = 0
+
+let targetX = 0
+let targetY = 0
+
+const windowX = window.innerWidth / 2
+const windowY = window.innerHeight / 2
+
+
+function onDocumentMouseMove(event) {
+    mouseX = event.clientX - windowX
+    mouseY = event.clientY - windowY
+}
+
+
+// zoom by scroll
+
+// window.addEventListener('mousewheel', onMouseWheelZoom)
+
+function onMouseWheelZoom(event) {
+    console.log(event.deltaY, camera.position.z + event.deltaY/500)
+    camera.position.z += event.deltaY/500;
+}
+
+// scroll bottom animate 
+
+window.addEventListener('scroll', onWindowScroll)
+
+function onWindowScroll() {
+    sphere.position.y = window.scrollY * .005
+
+    if (window.scrollY > window.innerHeight / 4) {
+        console.log('ooooo')
+        const text = document.getElementById('text')
+        const newOpacity = window.scrollY * .005 - 1
+        console.log(text.style.opacity, window.scrollY * .005 - 1)
+        text.style.opacity = `${newOpacity}`
+    }
+}
+
 const clock = new THREE.Clock()
 
 const tick = () =>
 {
 
+    targetX = mouseX * .001
+    targetY = mouseY * .001
+
     const elapsedTime = clock.getElapsedTime()
 
     // Update objects
     sphere.rotation.y = .5 * elapsedTime
+
+    sphere.rotation.y += .5 * (targetX - sphere.rotation.y)
+    sphere.rotation.x += .5 * (targetY - sphere.rotation.x)
+    sphere.rotation.z += .5 * (targetY - sphere.rotation.x)
 
     // Update Orbital Controls
     // controls.update()
@@ -103,3 +203,5 @@ const tick = () =>
 }
 
 tick()
+
+

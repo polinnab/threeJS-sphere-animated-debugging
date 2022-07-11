@@ -8,13 +8,38 @@ html,
 body
 {
     height: 100vh;
-    font-family: 'Poppins';
+    font-family: Arial, Helvetica, sans-serif ;
+    background-color: rgb(24, 24, 24);
 }
 
-.webgl
-{
-    position: fixed;
+.container {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+}
+
+h1 {
+    text-transform: uppercase;
+    color: white;
+    font-size: 6.5rem;
+    font-weight: 800;
+}
+
+.webgl {
+    position: absolute;
     top: 0;
     left: 0;
     outline: none;
+    mix-blend-mode: exclusion;
+}
+
+section {
+    height: 100vh;
+}
+
+#text {
+    opacity: 0;
+    font-size: 3rem;
+    color: white;
+    margin: 20px 20px 20px 40px;
 }
